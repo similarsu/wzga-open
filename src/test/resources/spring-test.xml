@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+       http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util-4.0.xsd
+       ">
+
+    <!-- middleObject jar中包含log4j 的类导致， hibernate 使用jbossLogging 默认使用log4j会报错， 现在强制使用slf4j -->
+    <bean id="jbossLoggingPropBean"
+          class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetObject">
+            <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+                <property name="targetClass" value="java.lang.System"/>
+                <property name="targetMethod" value="getProperties"/>
+            </bean>
+        </property>
+
+        <property name="targetMethod" value="putAll"/>
+
+        <property name="arguments">
+            <util:properties>
+                <prop key="org.jboss.logging.provider">slf4j</prop>
+            </util:properties>
+        </property>
+    </bean>
+</beans>

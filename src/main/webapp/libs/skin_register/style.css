@@ -1,0 +1,96 @@
+* {
+	margin:0;
+	padding:0;
+	border:none;
+}
+html, body	{height:100%;}
+body {
+	width:100%;
+	height:768px;
+	background:url(reg_bg1.png);
+	position:relative;
+	line-height:20px;
+	font: 12px/1 simsun, Tahoma, Helvetica, Arial,  sans-serif; 
+}
+.main {
+	width:1024px;
+	height:768px;
+	background:url(reg_bg.jpg) no-repeat;
+	display:block;
+	margin:0 auto;
+	position:relative;
+	}
+.regist {
+	width:1024px;
+	height:610px;
+}
+.reg_user, .reg_num, .reg_name, .reg_idcard , .reg_work, .reg_phone, .reg_email {
+	position:absolute;
+	width:165px;
+	height:21px;
+}
+.reg_user {
+	top:276px;
+	left:462px;
+	
+}
+.reg_num{
+	top:316px;
+	left:462px;
+	
+}
+.reg_name{
+	top:355px;
+	left:464px;
+	
+}
+.reg_idcard{
+	top:395px;
+	left:462px;
+	
+}
+.reg_work{
+	top:436px;
+	left:462px;
+	
+}
+.reg_phone{
+	top:476px;
+	left:462px;
+	
+}
+.reg_email{
+	top:514px;
+	left:462px;
+	
+}
+.reg_user input, .reg_num input, .reg_name input, .reg_idcard input, .reg_work input, .reg_phone input, .reg_email input {
+	width:165px;
+	height:19px;
+	background:url(click.gif) no-repeat;
+}
+
+.reg_button {
+	position:absolute;
+	width:87px;
+	height:34px;
+	top:557px;
+	left:469px;
+}
+.reg_button input {
+	width:87px;
+	height:29px;
+	background:url(reg_button.png) no-repeat;
+	cursor:pointer;
+}
+.reg_button input:hover {
+	background:url(reg_button.png) no-repeat 0 -32px;;
+}
+
+.reg_info {
+	color:#dfdfdf;
+	text-align:center;
+	padding-top:80px;
+	background:url(reg_bottom.png);
+
+}

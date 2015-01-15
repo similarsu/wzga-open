@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org/DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wzga.piqc.mapper.PersonInfoStatMapper">
+    <select id="queryPersonCollectInfoStat" resultType="personCollectInfoStat">
+        select
+        count(distinct person_id) as recCnt,
+        DEPT_ID as deptID
+        from
+        tbl_person_collect_log tblCollect,
+        sys_user tblUser
+        where tblCollect.creator = tblUser.id
+        <if test="null != queryColVal and null != queryCol">
+            and ${queryCol} = #{queryColVal}
+        </if>
+
+        <if test="null != collectSource">
+            and COLLECT_SOURCE = #{collectSource}
+        </if>
+
+        <if test="null != startDate">
+            <![CDATA[
+                    and tblCollect.CREATE_DATE >= #{startDate}
+                ]]>
+        </if>
+
+        <if test="null != endDate">
+            <![CDATA[
+                    and tblCollect.CREATE_DATE <= #{endDate}
+                ]]>
+        </if>
+
+        <if test="null != deptID">
+            and DEPT_ID = #{deptID}
+        </if>
+
+        group by DEPT_ID
+    </select>
+
+    <sql id="queryPersonBySearchCondition" >
+        from tbl_person_info personInfo
+        <where>
+            <if test="null != name">
+                <bind name="nameVar" value="'%' + _parameter.getName() + '%'" />
+                (
+                NAME like #{nameVar}
+                or ENGLISH_NAME like #{nameVar}
+                or LAST_NAME like #{nameVar}
+                or FIRST_NAME like #{nameVar}
+                or OLD_NAME like #{nameVar}
+                or ALIAS like #{nameVar}
+                )
+
+            </if>
+
+            <if test="null != addr">
+                <bind name="addrVar" value="'%' + _parameter.getAddr() + '%'" />
+                and (
+                PRESENT_ADDR like #{addrVar}
+                or TEMP_ADDR like #{addrVar}
+                or PERMANENT_ADDR like #{addrVar}
+                )
+            </if>
+
+            <if test="null != birthPlace">
+                <bind name="birthVar" value="'%' + _parameter.getBirthPlace() + '%'" />
+                and exists (
+                select *
+                from sys_division sd
+                where sd.NAME like #{birthVar} 
+                and sd.CODE = personInfo.HOMEPLACE
+                )
+
+            </if>
+
+            <if test="null != collectType">
+                and exists (
+                select *
+                from tbl_person_collect_log collLog
+                where personInfo.id = PERSON_ID
+                and COLLECT_TYPE_ID = #{collectType}
+                )
+
+            </if>
+
+            <if test="null != phone">
+                <bind name="phoneVar" value="'%' + _parameter.getPhone() + '%'" />
+                and exists (
+                select *
+                from tbl_person_phone phone
+                where personInfo.id = PERSON_ID
+                and (IMEI like #{phoneVar}
+                or PHONE_NUMBER like #{phoneVar}
+                ))
+
+            </if>
+
+            <if test="null != netProp">
+                <bind name="netPropVar" value="'%' + _parameter.getNetProp() + '%'" />
+                and exists (
+                select *
+                from tbl_person_net_prop netProp
+                where personInfo.id = PERSON_ID
+                and QQ like #{netPropVar}
+                or EMAIL like #{netPropVar}
+                or MSN like #{netPropVar}
+                or WEIXIN like #{netPropVar}
+                )
+
+            </if>
+
+            <if test="null != bankCard">
+                <bind name="bankCardVar" value="'%' + _parameter.getBankCard() + '%'" />
+                and exists (select *
+                from tbl_person_bank_card bankCard
+                where personInfo.id = PERSON_ID
+                and ACCOUNT like #{bankCardVar})
+
+            </if>
+
+            <if test="null != vehicle">
+                <bind name="vehicleVar" value="'%' + _parameter.getVehicle() + '%'" />
+                and (
+                exists (select *
+                from tbl_person_vehicle vehicle
+                where personInfo.id = PERSON_ID
+                and VEHICLE_CODE like #{vehicleVar}
+                or CARFRAME_CODE like #{vehicleVar})
+
+                or exists (select *
+                from tbl_person_battery_car batteryCar
+                where personInfo.id = PERSON_ID
+                and VEHICLE_CODE like #{vehicleVar})
+                )
+
+            </if>
+
+            <if test="null != checkInfo or null != checkType or null != checkStartDate or null != checkEndDate">
+                and exists (
+                select *
+                from tbl_person_check_log checkLog
+                where personInfo.IDENTIFY_CODE = IDENTIFY_CODE
+                    <if test="null != checkInfo">
+                        <bind name="checkInfoVar" value="'%' + _parameter.getCheckInfo() + '%'" />
+                        and (GPRS_LON like #{checkInfoVar}
+                        or GPRS_LAT like #{checkInfoVar}
+                        or GPRS_LON like #{checkInfoVar}
+                        or IP like #{checkInfoVar}
+                        or CREATE_UNIT like #{checkInfoVar})
+
+                    </if>
+
+
+                    <if test="null != checkType">
+                        and QUERY_TYPE = #{checkType}
+                    </if>
+
+                    <if test="null != checkStartDate and null != checkEndDate">
+                        <![CDATA[
+                           and ( CREATE_DATE >= #{checkStartDate} and CREATE_DATE <= #{checkEndDate} )
+                        ]]>
+                    </if>
+                    
+                    <if test="null != checkStartDate and null == checkEndDate">
+                        <![CDATA[
+                           and CREATE_DATE >= #{checkStartDate}
+                        ]]>
+                    </if>
+
+                    <if test="null == checkStartDate and null != checkEndDate">
+                        <![CDATA[
+                           and CREATE_DATE <= #{checkEndDate}
+                        ]]>
+                    </if>
+                )
+
+            </if>
+
+
+        </where>
+
+
+    </sql>
+
+    <select id="queryPersonBySearch" resultType="personInfo">
+        <include refid="cn.wzga.piqc.common.pagerStart" />
+
+        select
+            ID,
+            name,
+            IDENTIFY_CODE,
+            PRESENT_ADDR
+            <include refid="queryPersonBySearchCondition" />
+
+        <include refid="cn.wzga.piqc.common.pagerEnd" />
+    </select>
+
+    <select id="queryPersonBySearchCount" resultType="int">
+        select count(*)
+            <include refid="queryPersonBySearchCondition" />
+    </select>
+    
+    <select id="getPersonNativeCollectStatAll" parameterType="personNativeCollectStatQuery" resultType="personNativeCollectStat">
+	    SELECT 
+		     t3.dept_name deptName,
+		     t3.dept_code deptCode,
+		     count(distinct(t1.person_id)) peCnt,
+		     count(distinct(case when t1.collect_source = 1 then 'pcPeCnt_'||t1.person_id end)) pcPeCnt,
+		     count(distinct(case when t1.collect_source = 2 then 'moPeCnt_'||t1.person_id end)) moPeCnt
+		FROM 
+		     tbl_person_collect_log t1
+		LEFT JOIN
+		     sys_user t2 ON t2.id = t1.creator
+		LEFT JOIN
+		     sys_department t3 ON t3.id = t2.dept_id
+		LEFT JOIN
+		     tbl_person_info t4 ON t4.id = t1.person_id
+		<where>
+		  	<if test="null != deptCode">
+		  		<![CDATA[
+	           		AND t3.dept_code = #{deptCode}
+	           ]]>
+	        </if>
+	
+	        <if test="null != startDate">
+	            <![CDATA[
+	                AND t1.create_date >= #{startDate}
+	            ]]>
+	        </if>
+	
+	        <if test="null != endDate">
+	            <![CDATA[
+	                AND t1.create_date <= #{endDate}
+	            ]]>
+	        </if>
+        </where> 
+		GROUP BY
+		     t3.dept_name,t3.dept_code
+		ORDER BY
+		     t3.dept_code
+    </select>
+    
+    <select id="getPersonNativeCollectStatDivision" parameterType="personNativeCollectStatQuery" resultType="personNativeCollectStat">
+	    SELECT 
+		     t3.dept_name deptName,
+		     t3.dept_code deptCode,
+		     count(distinct(case when t4.homeplace = #{division} then 'peCnt_'||t1.person_id end)) peCnt,
+		     count(distinct(case when t1.collect_source = 1 and t4.homeplace = #{division} then 'pcPeCnt_'||t1.person_id end)) pcPeCnt,
+		     count(distinct(case when t1.collect_source = 2 and t4.homeplace = #{division} then 'moPeCnt_'||t1.person_id end)) moPeCnt
+		FROM 
+		     tbl_person_collect_log t1
+		LEFT JOIN
+		     sys_user t2 ON t2.id = t1.creator
+		LEFT JOIN
+		     sys_department t3 ON t3.id = t2.dept_id
+		LEFT JOIN
+		     tbl_person_info t4 ON t4.id = t1.person_id
+		<where>
+		  	<if test="null != deptCode">
+		  		<![CDATA[
+	           		AND t3.dept_code = #{deptCode}
+	           ]]>
+	        </if>
+	
+	        <if test="null != startDate">
+	            <![CDATA[
+	                AND t1.create_date >= #{startDate}
+	            ]]>
+	        </if>
+	
+	        <if test="null != endDate">
+	            <![CDATA[
+	                AND t1.create_date <= #{endDate}
+	            ]]>
+	        </if>
+        </where>
+		GROUP BY
+		     t3.dept_name,t3.dept_code
+		ORDER BY
+		     t3.dept_code
+    </select>
+
+</mapper>

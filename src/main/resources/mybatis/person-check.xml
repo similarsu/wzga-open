@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org/DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wzga.piqc.mapper.PersonCheckStatMapper">
+	<select id="getPersonCheckStatList" parameterType="personCheckStatQuery" resultType="personCheckStat">
+	   <![CDATA[
+	   	SELECT 
+	   		   t1.deptName,t1.totalPeCnt,t1.pcPeCnt,t1.moPeCnt,t1.totalCnt,t1.pcCnt,t1.moCnt,
+		       t2.oneCnt,t2.twoCnt,t2.threeCnt,t2.fourCnt,t2.fiveCnt
+		FROM 
+				(select 
+					   create_unit deptName,
+				       count(distinct(identify_code)) totalPeCnt,
+				       count(distinct(case when terminal_type = 1 then 'pcPeCnt_'||identify_code end)) pcPeCnt,
+				       count(distinct(case when terminal_type = 2 then 'moPeCnt_'||identify_code end)) moPeCnt,
+				       count(identify_code) totalCnt,
+				       count(case when terminal_type = 1 then 'pcPeCnt' end) pcCnt,
+				       count(case when terminal_type = 2 then 'moPeCnt' end) moCnt
+				  from 
+				       tbl_person_check_log
+				 ]]>
+				 <where>
+				  	<if test="null != deptCode">
+				  		<![CDATA[
+			           		create_unit_code = #{deptCode}
+			           ]]>
+			        </if>
+			
+			        <if test="null != startDate">
+			            <![CDATA[
+			                and create_date >= #{startDate}
+			            ]]>
+			        </if>
+			
+			        <if test="null != endDate">
+			            <![CDATA[
+			                and create_date <= #{endDate}
+			            ]]>
+			        </if>
+		       	 </where>
+		       	 <![CDATA[
+				 group by 
+				       create_unit) t1
+		LEFT JOIN 
+				(select
+				       create_unit deptName,
+				       count(distinct(case when quantity = 1 then identify_code||'_one' end)) oneCnt,
+				       count(distinct(case when quantity = 2 then identify_code||'_two' end)) twoCnt,
+				       count(distinct(case when quantity = 3 then identify_code||'_three' end)) threeCnt,
+				       count(distinct(case when quantity = 4 then identify_code||'_four' end)) fourCnt,
+				       count(distinct(case when quantity = 5 then identify_code||'_five' end)) fiveCnt
+				  from
+				       tbl_person_suspicion_index
+				 ]]>
+				 <where>
+				  	<if test="null != deptCode">
+				  		<![CDATA[
+			           		create_unit_code = #{deptCode}
+			           ]]>
+			        </if>
+			
+			        <if test="null != startDate">
+			            <![CDATA[
+			                and create_date >= #{startDate}
+			            ]]>
+			        </if>
+			
+			        <if test="null != endDate">
+			            <![CDATA[
+			                and create_date <= #{endDate}
+			            ]]>
+			        </if>
+		       	 </where>
+		       	 <![CDATA[
+				 group by 
+				       create_unit) t2
+		ON 
+			t1.deptName = t2.deptName
+		]]>
+	</select>
+</mapper>

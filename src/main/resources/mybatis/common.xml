@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org/DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wzga.piqc.common">
+    <sql id="pagerStart">
+        select *
+        from (
+            select tmptbl.*, ROWNUM rn
+            from (
+    </sql>
+
+    <!-- rowStartNo 从0开始 -->
+    <sql id="pagerEnd">
+        <![CDATA[
+                ) tmptbl where ROWNUM > #{rowStartNo}
+        ) where rn <= #{rowEndNo}
+
+        ]]>
+    </sql>
+
+</mapper>

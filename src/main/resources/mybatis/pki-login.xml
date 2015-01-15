@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org/DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wzga.piqc.mapper.PkiLoginStatMapper">
+	<select id="getPkiLoginStatList" parameterType="pkiLoginStatQuery" resultType="pkiLoginStat">
+		SELECT 
+		   	t3.dept_name deptName,
+	       	count(distinct(t1.name)) peCnt,
+	       	count(t1.name) totalCnt
+	  	FROM
+	  	   	sys_login_log t1
+	  	LEFT JOIN
+	  		sys_user t2 on t1.name = t2.chinese_name
+	  	LEFT JOIN 
+	  		sys_department t3 on t2.dept_id = t3.id
+	 	WHERE 	
+	 		t1.status = 3
+	  	<if test="null != deptCode">
+	  		<![CDATA[
+           		and t2.dept_code = #{deptCode}
+           ]]>
+        </if>
+
+        <if test="null != startDate">
+            <![CDATA[
+                and t1.log_date >= #{startDate}
+            ]]>
+        </if>
+
+        <if test="null != endDate">
+            <![CDATA[
+                and t1.log_date <= #{endDate}
+            ]]>
+        </if>
+	   	GROUP BY
+	   	   t3.dept_name 
+	</select>
+</mapper>

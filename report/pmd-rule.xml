@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         name="tmprule"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+
+    <description>PMD static code analysis rule set for wzga</description>
+
+    <rule ref="rulesets/java/basic.xml"/>
+    <rule ref="rulesets/java/braces.xml"/>
+
+    <rule ref="rulesets/java/clone.xml"/>
+
+    <rule ref="rulesets/java/codesize.xml">
+        <exclude name="CyclomaticComplexity"/>
+        <!-- avoids duplication -->
+        <exclude name="ExcessiveMethodLength"/>
+        <!-- avoids duplication -->
+        <exclude name="NcssMethodCount"/>
+        <!-- avoids duplication -->
+        <exclude name="TooManyMethods"/>
+        <!-- avoids duplication -->
+    </rule>
+
+    <!-- customize code size rules -->
+    <rule ref="rulesets/java/codesize.xml/CyclomaticComplexity">
+        <properties>
+            <property name="reportLevel" value="10"/>
+            <property name="showClassesComplexity" value="false"/>
+        </properties>
+    </rule>
+    <rule ref="rulesets/java/codesize.xml/NcssMethodCount">
+        <properties>
+            <property name="minimum" value="60"/>
+        </properties>
+    </rule>
+    <rule ref="rulesets/java/codesize.xml/NcssConstructorCount">
+        <properties>
+            <property name="minimum" value="60"/>
+        </properties>
+    </rule>
+    <rule ref="rulesets/java/codesize.xml/TooManyMethods" />
+    <rule ref="rulesets/java/codesize.xml/TooManyMethods">
+        <properties>
+            <property name="maxmethods" value="30"/>
+        </properties>
+    </rule>
+
+    <rule ref="rulesets/java/controversial.xml">
+        <exclude name="AtLeastOneConstructor"/>
+        <!-- Not clear why this is useful                                 -->
+        <exclude name="AvoidFinalLocalVariable"/>
+        <!-- See "Hardcore Java," Chapter 2: "The Final Story"            -->
+        <exclude name="AvoidUsingNativeCode"/>
+        <!-- Decisions like this will not require PMD to tell us about it -->
+        <exclude name="AvoidUsingVolatile"/>
+        <!-- Learn about volatile in "Java Concurrency in Practice"       -->
+        <exclude name="CallSuperInConstructor"/>
+        <!-- Rule cannot know which super() overload should be called     -->
+        <exclude name="DataflowAnomalyAnalysis"/>
+        <!-- Rule does not appear to be correct                           -->
+        <exclude name="DefaultPackage"/>
+        <!-- Package private is legitimate                                -->
+        <exclude name="OnlyOneReturn"/>
+        <!-- Certainly a good ideal to strive for, but not an absolute    -->
+        <exclude name="UnnecessaryParentheses"/>
+        <!-- Extra parens can clarify expressions when used tastefully    -->
+    </rule>
+
+    <rule ref="rulesets/java/coupling.xml">
+        <exclude name="CouplingBetweenObjects"/>
+        <!-- avoids duplication -->
+        <exclude name="ExcessiveImports"/>
+        <!-- avoids duplication -->
+    </rule>
+    <rule ref="rulesets/java/coupling.xml/ExcessiveImports">
+        <properties>
+            <property name="minimum" value="40"/>
+            <!-- Default is 30, The "One LOC does one thing" principle tends to increases imports -->
+        </properties>
+    </rule>
+    <rule ref="rulesets/java/coupling.xml/CouplingBetweenObjects">
+        <properties>
+            <property name="threshold" value="60"/>
+        </properties>
+    </rule>
+
+    <rule ref="rulesets/java/design.xml">
+        <exclude name="AbstractClassWithoutAnyMethod"/>
+        <!-- abstract -> non-instantable, not protected ctor        -->
+        <exclude name="AbstractClassWithoutAbstractMethod"/>
+        <!-- abstract -> non-instantable, not protected ctor        -->
+        <exclude name="AvoidConstantsInterface"/>
+        <!-- accept or reject advice of Effective Java item 19?     -->
+        <exclude name="CloseResource"/>
+        <!-- avoids duplication                                     -->
+        <exclude name="UseLocaleWithCaseConversions"/>
+    </rule>
+
+    <rule ref="rulesets/java/imports.xml">
+        <exclude name="TooManyStaticImports"/>
+        <!-- avoids duplication -->
+    </rule>
+    <rule ref="rulesets/java/imports.xml/TooManyStaticImports">
+        <properties>
+            <property name="maximumStaticImports" value="6"/>
+        </properties>
+    </rule>
+
+    <rule ref="rulesets/java/logging-java.xml"/>
+
+    <rule ref="rulesets/java/naming.xml">
+        <!--
+            Semantic value, not string length, determines whether a symbol is
+            well-chosen. Prefer symbols that are long enough, but no
+            longer. Spell entire words, don't be cryptic. Camel-case or
+            all-capitals for constants, NO UNDERBARS, NO "Hungarian Notation."
+        -->
+        <exclude name="LongVariable"/>
+    </rule>
+
+    <rule ref="rulesets/java/optimizations.xml"/>
+    <rule ref="rulesets/java/strictexception.xml"/>
+
+    <rule ref="rulesets/java/strings.xml"/>
+    <rule ref="rulesets/java/sunsecure.xml"/>
+
+    <rule ref="rulesets/java/typeresolution.xml">
+        <exclude name="UnusedImports"/>
+        <!-- avoids duplication, included in the "imports" ruleset         -->
+        <exclude name="SignatureDeclareThrowsException"/>
+        <!-- avoids duplication, included in the "strictexception" ruleset -->
+        <exclude name="CloneMethodMustImplementCloneable"/>
+        <!-- avoids duplication, included in the "clone" ruleset           -->
+        <exclude name="LooseCoupling"/>
+        <!-- avoids duplication, included in the "coupling" ruleset        -->
+    </rule>
+
+    <rule ref="rulesets/java/unusedcode.xml"/>
+</ruleset>
